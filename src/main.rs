@@ -54,30 +54,18 @@ fn main() -> Result<(), Box<dyn Error>> {
         stack.push(bag.name);
     }
 
-    let mut goldhavers = HashSet::new();
-    goldhavers.insert(String::from("shiny gold"));
-    let mut seen: HashSet<String> = HashSet::new();
-    while !stack.is_empty() {
-        let bag = String::from(stack.last().unwrap());
-        let mut complete = true;
-        if seen.contains(&bag) {
-            stack.pop();
-            continue;
-        }
-        for (_,mini) in bags.get(&bag).unwrap() {
-            if goldhavers.contains::<str>(&mini){
-                goldhavers.insert(String::from(&bag));
-                break;
-            } else if !seen.contains::<str>(&mini) {
-                stack.push(String::from(mini));
-                complete = false;
-            }
-        }
-        if complete {
-            stack.pop();
-            seen.insert(String::from(&bag));
+    let mut seen = HashMap::new();
+    println!("{}",bagcount("shiny gold",&bags,&mut seen));
+    Ok(())
+}
+
+fn bagcount(input: &str, bags: &HashMap<String,Vec<(usize,String)>>, seen: &mut HashMap<String, usize>) -> usize {
+    let mut count = 1;
+    for (num, bag) in bags.get(input).unwrap() {
+        count += match seen.get(bag) {
+            Some(i) => {num * i},
+            None => {let i = bagcount(bag,bags,seen); seen.insert(String::from(bag), i); i * num},
         }
     }
-    println!("{}",goldhavers.len());
-    Ok(())
+    return count;
 }
